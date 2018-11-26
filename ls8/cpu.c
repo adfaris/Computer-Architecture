@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#define DATA_LEN 6
+#define DATA_LEN 12
 
 unsigned char cpu_ram_read(struct cpu *cpu, unsigned char MAR)
 {
@@ -22,12 +22,25 @@ void cpu_load(struct cpu *cpu)
 {
   char data[DATA_LEN] = {
       // From print8.ls8
-      0b10000010, // LDI R0,8
+      // 0b10000010, // LDI R0,8
+      // 0b00000000,
+      // 0b00001000,
+      // 0b01000111, // PRN R0
+      // 0b00000000,
+      // 0b00000001 // HLT
+      0b10000010,
       0b00000000,
       0b00001000,
-      0b01000111, // PRN R0
+      0b10000010,
+      0b00000001,
+      0b00001001,
+      0b10100010,
       0b00000000,
-      0b00000001 // HLT
+      0b00000001,
+      0b01000111,
+      0b00000000,
+      0b00000001,
+
   };
 
   int address = 0;
@@ -49,6 +62,7 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
   {
   case ALU_MUL:
     // TODO
+    cpu->registers[regA] *= cpu->registers[regB];
     break;
 
     // TODO: implement more ALU ops
@@ -82,6 +96,10 @@ void cpu_run(struct cpu *cpu)
 
     case HLT:
       running = 0;
+      break;
+
+    case MUL:
+      alu(cpu, ALU_MUL, operandA, operandB);
       break;
     }
     // 3. Do whatever the instruction should do according to the spec.
